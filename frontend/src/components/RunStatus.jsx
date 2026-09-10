@@ -27,7 +27,7 @@ export default function RunStatus({ jobId, onDone, onError }) {
           onError(job.error_message || 'Job failed')
         }
       } catch (err) {
-        if (cancelled) return
+        if (cancelled || done) return
         done = true
         clearInterval(interval)
         onError(err.message)
