@@ -8,21 +8,27 @@ export default function RunStatus({ jobId, onDone, onError }) {
 
   useEffect(() => {
     let cancelled = false
+    let done = false
     const interval = setInterval(async () => {
+      if (done) return
       try {
         const job = await getJob(jobId)
         if (cancelled) return
+        if (done) return
         setStatus(job.status)
         if (job.status === 'done') {
+          done = true
           clearInterval(interval)
           const result = await getJobResult(jobId)
           if (!cancelled) onDone(result)
         } else if (job.status === 'error') {
+          done = true
           clearInterval(interval)
           onError(job.error_message || 'Job failed')
         }
       } catch (err) {
         if (cancelled) return
+        done = true
         clearInterval(interval)
         onError(err.message)
       }
