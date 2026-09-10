@@ -1,8 +1,7 @@
 export default function ResultsView({ result, onReset }) {
-  const { output_video_url, counts, total } = result
+  const { counts, total } = result
   return (
     <div className="results-view">
-      <video src={output_video_url} controls width="480" data-testid="result-video" />
       <table>
         <tbody>
           {Object.entries(counts).map(([name, count]) => (

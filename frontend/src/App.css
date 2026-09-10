@@ -1,0 +1,212 @@
+.app {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 280px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "params main result"
+    "footer footer footer";
+  gap: 20px;
+  padding: 20px;
+  min-height: 100svh;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "main"
+      "params"
+      "result"
+      "footer";
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.panel--params {
+  grid-area: params;
+}
+.panel--main {
+  grid-area: main;
+}
+.panel--result {
+  grid-area: result;
+}
+.panel--footer {
+  grid-area: footer;
+}
+
+.panel__label {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--text-h);
+  margin: 0 0 8px;
+}
+
+.panel__body {
+  flex: 1;
+  min-height: 120px;
+  padding: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--code-bg);
+  overflow: auto;
+}
+
+.panel__body--main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.panel__body--footer {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Parameter panel */
+
+.params-panel {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.params-panel legend {
+  padding: 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.params-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.params-panel input[type='range'],
+.params-panel select {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.class-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.class-checkboxes label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.class-checkboxes input[type='checkbox'] {
+  accent-color: var(--accent);
+}
+
+.run-button {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 15px;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.run-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Main viewport */
+
+.upload-step {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  font-size: 15px;
+}
+
+canvas[data-testid='line-canvas'],
+.result-video {
+  max-width: 100%;
+  max-height: 60svh;
+  border-radius: 8px;
+}
+
+/* Result panel */
+
+.results-view table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.results-view td {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-view td:last-child {
+  text-align: right;
+  color: var(--text-h);
+}
+
+.results-view button {
+  margin-top: 16px;
+  width: 100%;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-h);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.empty {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* Footer */
+
+.run-status p {
+  font-size: 15px;
+}
+
+[role='alert'] {
+  color: #b4232c;
+  font-size: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  [role='alert'] {
+    color: #ff8a8a;
+  }
+}
