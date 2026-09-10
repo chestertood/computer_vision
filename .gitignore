@@ -1,0 +1,10 @@
+node_modules/
+frontend/dist/
+.venv/
+backend/.venv/
+__pycache__/
+*.pyc
+backend/outputs/
+*.mp4
+*.pt
+backend/car_*.jpg
