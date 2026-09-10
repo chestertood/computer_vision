@@ -17,10 +17,11 @@ export default function RunStatus({ jobId, onDone, onError }) {
         if (done) return
         setStatus(job.status)
         if (job.status === 'done') {
-          done = true
           clearInterval(interval)
           const result = await getJobResult(jobId)
-          if (!cancelled) onDone(result)
+          if (cancelled || done) return
+          done = true
+          onDone(result)
         } else if (job.status === 'error') {
           done = true
           clearInterval(interval)
