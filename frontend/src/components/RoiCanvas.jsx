@@ -16,9 +16,12 @@ function clampPoint(x, y, width, height) {
   }
 }
 
+const MIN_ROI_SIZE = 4 // frame-pixel threshold below which a drag is treated as a stray click
+
 export default function RoiCanvas({ width, height, roi, onChange, style }) {
   const canvasRef = useRef(null)
   const startRef = useRef(null)
+  const lastRectRef = useRef(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -49,14 +52,24 @@ export default function RoiCanvas({ width, height, roi, onChange, style }) {
   function handlePointerDown(e) {
     const p = pointFromEvent(e)
     startRef.current = p
-    onChange(normalizeRoi(p.x, p.y, p.x, p.y))
+    const rect = normalizeRoi(p.x, p.y, p.x, p.y)
+    lastRectRef.current = rect
+    onChange(rect)
   }
   function handlePointerMove(e) {
     if (!startRef.current) return
     const p = pointFromEvent(e)
-    onChange(normalizeRoi(startRef.current.x, startRef.current.y, p.x, p.y))
+    const rect = normalizeRoi(startRef.current.x, startRef.current.y, p.x, p.y)
+    lastRectRef.current = rect
+    onChange(rect)
   }
   function handlePointerUp() {
+    if (startRef.current) {
+      const rect = lastRectRef.current
+      if (rect && rect.x2 - rect.x1 < MIN_ROI_SIZE && rect.y2 - rect.y1 < MIN_ROI_SIZE) {
+        onChange(null)
+      }
+    }
     startRef.current = null
   }
 

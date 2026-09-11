@@ -52,6 +52,7 @@ export default function App() {
 
   function handleError(message) {
     setErrorMessage(message)
+    setResult(null)
     setStep('setup')
   }
 
@@ -86,9 +87,9 @@ export default function App() {
         <div className="panel__body panel__body--main">
           {!videoData && <UploadStep onUploaded={handleUploaded} />}
 
-          {videoData && step !== 'results' && (
+          {videoData && !result?.output_video_url && (
             <div className="setup-area">
-              <div className={`preview-stack ${running ? 'preview-stack--locked' : ''}`}>
+              <div className={`preview-stack${running ? ' preview-stack--locked' : ''}`}>
                 <LineCanvas
                   imageUrl={videoData.preview_frame_url}
                   width={videoData.width}
@@ -105,7 +106,7 @@ export default function App() {
                 />
               </div>
               {!running && (
-                <div className="draw-mode-toggle" role="radiogroup" aria-label="Draw mode">
+                <div className="draw-mode-toggle" role="group" aria-label="Draw mode">
                   <button
                     type="button"
                     aria-pressed={drawMode === 'line'}

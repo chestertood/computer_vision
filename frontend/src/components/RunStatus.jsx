@@ -7,6 +7,7 @@ const DONE_STATUSES = ['done', 'stopped']
 export default function RunStatus({ jobId, onProgress, onDone, onError }) {
   const [status, setStatus] = useState('queued')
   const [stopping, setStopping] = useState(false)
+  const [stopError, setStopError] = useState(null)
 
   const finishedRef = useRef(false)
   const onProgressRef = useRef(onProgress)
@@ -26,6 +27,7 @@ export default function RunStatus({ jobId, onProgress, onDone, onError }) {
         const result = await getJobResult(jobId)
         if (cancelled || finishedRef.current) return
         setStatus(result.status)
+        setStopError(null)
         onProgressRef.current(result)
         if (result.status === 'error') {
           finishedRef.current = true
@@ -51,13 +53,14 @@ export default function RunStatus({ jobId, onProgress, onDone, onError }) {
 
   async function handleStop() {
     setStopping(true)
+    setStopError(null)
     try {
       await stopJob(jobId)
     } catch (err) {
-      if (!finishedRef.current) {
-        finishedRef.current = true
-        onError(err.message)
-      }
+      // The cancel request failed, but the job itself is very likely still
+      // running on the backend — don't treat this as terminal. Keep polling
+      // so the job can still reach a real terminal state or the user can retry.
+      setStopError(err.message)
     } finally {
       setStopping(false)
     }
@@ -71,6 +74,7 @@ export default function RunStatus({ jobId, onProgress, onDone, onError }) {
       <button className="stop-button" onClick={handleStop} disabled={!canStop || stopping}>
         {stopping ? 'Stopping…' : 'Stop'}
       </button>
+      {stopError && <p className="stop-error" role="alert">Stop failed: {stopError}</p>}
     </div>
   )
 }

@@ -30,11 +30,6 @@ export async function createJob({ video_id, conf, imgsz, classes, line_y, roi })
   return parseOrThrow(res)
 }
 
-export async function getJob(jobId) {
-  const res = await fetch(`${API_BASE}/jobs/${jobId}`)
-  return parseOrThrow(res)
-}
-
 export async function getJobResult(jobId) {
   const res = await fetch(`${API_BASE}/jobs/${jobId}/result`)
   return parseOrThrow(res)

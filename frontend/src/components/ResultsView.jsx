@@ -7,7 +7,7 @@ const STATUS_LABEL = {
 }
 
 export default function ResultsView({ result, onReset }) {
-  const { status, counts, total, vehicles = [] } = result
+  const { status, counts = {}, total = 0, vehicles = [] } = result
   const finished = status === 'done' || status === 'stopped' || status === 'error'
 
   return (
@@ -29,8 +29,8 @@ export default function ResultsView({ result, onReset }) {
       </table>
       {vehicles.length > 0 && (
         <ul className="vehicle-gallery">
-          {vehicles.map((v) => (
-            <li key={v.ts} className="vehicle-card">
+          {[...vehicles].reverse().map((v, i) => (
+            <li key={i} className="vehicle-card">
               <img src={`data:image/jpeg;base64,${v.image_b64}`} alt={v.type} />
               <span>{v.type}</span>
             </li>
