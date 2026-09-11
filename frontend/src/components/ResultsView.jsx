@@ -1,7 +1,18 @@
+const STATUS_LABEL = {
+  queued: 'Queued…',
+  running: 'Running…',
+  stopped: 'Stopped',
+  done: 'Done',
+  error: 'Error',
+}
+
 export default function ResultsView({ result, onReset }) {
-  const { counts, total } = result
+  const { status, counts, total, vehicles = [] } = result
+  const finished = status === 'done' || status === 'stopped' || status === 'error'
+
   return (
     <div className="results-view">
+      <p className="results-view__status">{STATUS_LABEL[status] || status}</p>
       <table>
         <tbody>
           {Object.entries(counts).map(([name, count]) => (
@@ -16,7 +27,17 @@ export default function ResultsView({ result, onReset }) {
           </tr>
         </tbody>
       </table>
-      <button onClick={onReset}>Run another</button>
+      {vehicles.length > 0 && (
+        <ul className="vehicle-gallery">
+          {vehicles.map((v) => (
+            <li key={v.ts} className="vehicle-card">
+              <img src={`data:image/jpeg;base64,${v.image_b64}`} alt={v.type} />
+              <span>{v.type}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {finished && <button onClick={onReset}>Run another</button>}
     </div>
   )
 }
