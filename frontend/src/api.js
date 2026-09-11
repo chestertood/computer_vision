@@ -21,11 +21,11 @@ export async function uploadVideo(file) {
   return parseOrThrow(res)
 }
 
-export async function createJob({ video_id, conf, imgsz, classes, line_y }) {
+export async function createJob({ video_id, conf, imgsz, classes, line_y, roi }) {
   const res = await fetch(`${API_BASE}/jobs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ video_id, conf, imgsz, classes, line_y }),
+    body: JSON.stringify({ video_id, conf, imgsz, classes, line_y, roi }),
   })
   return parseOrThrow(res)
 }
@@ -37,5 +37,10 @@ export async function getJob(jobId) {
 
 export async function getJobResult(jobId) {
   const res = await fetch(`${API_BASE}/jobs/${jobId}/result`)
+  return parseOrThrow(res)
+}
+
+export async function stopJob(jobId) {
+  const res = await fetch(`${API_BASE}/jobs/${jobId}/stop`, { method: 'POST' })
   return parseOrThrow(res)
 }
