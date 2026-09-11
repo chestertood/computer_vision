@@ -101,7 +101,7 @@ export default function App() {
                   height={videoData.height}
                   roi={roi}
                   onChange={setRoi}
-                  style={{ pointerEvents: drawMode === 'roi' ? 'auto' : 'none' }}
+                  style={{ pointerEvents: drawMode === 'roi' && !running ? 'auto' : 'none' }}
                 />
               </div>
               {!running && (

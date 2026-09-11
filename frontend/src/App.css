@@ -73,6 +73,7 @@
   min-height: 0;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -194,10 +195,187 @@ canvas[data-testid='line-canvas'],
   opacity: 0.7;
 }
 
+/* Main viewport: preview stack (line + ROI overlays) */
+
+.setup-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Sizing comes from the line canvas; the ROI canvas is stretched onto its box
+   so the two stay registered whichever constraint clamps the preview. */
+.preview-stack {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.preview-stack canvas {
+  display: block;
+}
+
+.preview-stack .roi-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.preview-stack--locked canvas {
+  pointer-events: none;
+}
+
+/* Draw-mode toggle: segmented control, not two loose pills. The solid accent
+   fill is reserved for .run-button, so mode state is carried by the tint. */
+.draw-mode-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+}
+
+.draw-mode-toggle button {
+  padding: 5px 18px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.draw-mode-toggle button:hover {
+  color: var(--text-h);
+}
+
+.draw-mode-toggle button.active {
+  color: var(--text-h);
+  background: var(--accent-bg);
+  box-shadow: inset 0 0 0 1px var(--accent-border);
+}
+
+/* Stop button: .run-button's metrics, danger tone. */
+
+.stop-button {
+  padding: 8px 18px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: #fff;
+  background: #b4232c;
+  border: 1px solid #8f1c23;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.stop-button:hover:not(:disabled) {
+  background: #9c1e26;
+}
+
+.stop-button:active:not(:disabled) {
+  background: #8f1c23;
+}
+
+.stop-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.draw-mode-toggle button:focus-visible,
+.stop-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Result panel: status + vehicle contact sheet */
+
+.results-view__status {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+/* Capped so a long run's crops can't bury the totals or "Run another". */
+.vehicle-gallery {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 6px;
+  max-height: 38svh;
+  overflow-y: auto;
+}
+
+.vehicle-card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.vehicle-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehicle-card span {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 3px 6px;
+  font-size: 11px;
+  line-height: 14px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.72);
+  text-transform: capitalize;
+}
+
 /* Footer */
 
+.run-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .run-status p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 15px;
+}
+
+.run-status p::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: run-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes run-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .run-status p::before {
+    animation: none;
+  }
 }
 
 [role='alert'] {

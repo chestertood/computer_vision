@@ -25,10 +25,18 @@ export default function RoiCanvas({ width, height, roi, onChange, style }) {
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, width, height)
     if (!roi) return
+    const w = roi.x2 - roi.x1
+    const h = roi.y2 - roi.y1
+    // Dark solid underlay so the dashed stroke stays readable on bright sky
+    // and dark asphalt alike; the gaps show the underlay through.
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)'
+    ctx.lineWidth = 4
+    ctx.setLineDash([])
+    ctx.strokeRect(roi.x1, roi.y1, w, h)
     ctx.strokeStyle = '#2ecc71'
     ctx.lineWidth = 2
     ctx.setLineDash([8, 6])
-    ctx.strokeRect(roi.x1, roi.y1, roi.x2 - roi.x1, roi.y2 - roi.y1)
+    ctx.strokeRect(roi.x1, roi.y1, w, h)
   }, [roi, width, height])
 
   function pointFromEvent(e) {
