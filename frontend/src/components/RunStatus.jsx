@@ -1,36 +1,33 @@
 import { useEffect, useState } from 'react'
-import { getJob, getJobResult } from '../api'
+import { getJobResult, stopJob } from '../api'
 
 const POLL_MS = 1500
+const TERMINAL = ['done', 'stopped', 'error']
 
-export default function RunStatus({ jobId, onDone, onError }) {
+export default function RunStatus({ jobId, onProgress, onDone, onError }) {
   const [status, setStatus] = useState('queued')
+  const [stopping, setStopping] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    let done = false
+    let finished = false
     const interval = setInterval(async () => {
-      if (done) return
+      if (finished) return
       try {
-        const job = await getJob(jobId)
-        if (cancelled) return
-        if (done) return
-        setStatus(job.status)
-        if (job.status === 'done') {
-          clearInterval(interval)
-          const result = await getJobResult(jobId)
-          if (cancelled || done) return
-          done = true
+        const result = await getJobResult(jobId)
+        if (cancelled || finished) return
+        setStatus(result.status)
+        onProgress(result)
+        if (result.status === 'error') {
+          finished = true
+          onError(result.error_message || 'Job failed')
+        } else if (TERMINAL.includes(result.status)) {
+          finished = true
           onDone(result)
-        } else if (job.status === 'error') {
-          done = true
-          clearInterval(interval)
-          onError(job.error_message || 'Job failed')
         }
       } catch (err) {
-        if (cancelled || done) return
-        done = true
-        clearInterval(interval)
+        if (cancelled || finished) return
+        finished = true
         onError(err.message)
       }
     }, POLL_MS)
@@ -38,11 +35,27 @@ export default function RunStatus({ jobId, onDone, onError }) {
       cancelled = true
       clearInterval(interval)
     }
-  }, [jobId, onDone, onError])
+  }, [jobId, onProgress, onDone, onError])
+
+  async function handleStop() {
+    setStopping(true)
+    try {
+      await stopJob(jobId)
+    } catch (err) {
+      onError(err.message)
+    } finally {
+      setStopping(false)
+    }
+  }
+
+  const canStop = status === 'queued' || status === 'running'
 
   return (
     <div className="run-status" role="status">
       <p>Status: {status}</p>
+      <button className="stop-button" onClick={handleStop} disabled={!canStop || stopping}>
+        {stopping ? 'Stopping…' : 'Stop'}
+      </button>
     </div>
   )
 }
