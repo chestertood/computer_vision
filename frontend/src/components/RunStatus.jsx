@@ -1,48 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getJobResult, stopJob } from '../api'
 
 const POLL_MS = 1500
-const TERMINAL = ['done', 'stopped', 'error']
+const DONE_STATUSES = ['done', 'stopped']
 
 export default function RunStatus({ jobId, onProgress, onDone, onError }) {
   const [status, setStatus] = useState('queued')
   const [stopping, setStopping] = useState(false)
 
+  const finishedRef = useRef(false)
+  const onProgressRef = useRef(onProgress)
+  const onDoneRef = useRef(onDone)
+  const onErrorRef = useRef(onError)
+
+  useEffect(() => { onProgressRef.current = onProgress }, [onProgress])
+  useEffect(() => { onDoneRef.current = onDone }, [onDone])
+  useEffect(() => { onErrorRef.current = onError }, [onError])
+
   useEffect(() => {
     let cancelled = false
-    let finished = false
+    finishedRef.current = false
     const interval = setInterval(async () => {
-      if (finished) return
+      if (finishedRef.current) return
       try {
         const result = await getJobResult(jobId)
-        if (cancelled || finished) return
+        if (cancelled || finishedRef.current) return
         setStatus(result.status)
-        onProgress(result)
+        onProgressRef.current(result)
         if (result.status === 'error') {
-          finished = true
-          onError(result.error_message || 'Job failed')
-        } else if (TERMINAL.includes(result.status)) {
-          finished = true
-          onDone(result)
+          finishedRef.current = true
+          clearInterval(interval)
+          onErrorRef.current(result.error_message || 'Job failed')
+        } else if (DONE_STATUSES.includes(result.status)) {
+          finishedRef.current = true
+          clearInterval(interval)
+          onDoneRef.current(result)
         }
       } catch (err) {
-        if (cancelled || finished) return
-        finished = true
-        onError(err.message)
+        if (cancelled || finishedRef.current) return
+        finishedRef.current = true
+        clearInterval(interval)
+        onErrorRef.current(err.message)
       }
     }, POLL_MS)
     return () => {
       cancelled = true
       clearInterval(interval)
     }
-  }, [jobId, onProgress, onDone, onError])
+  }, [jobId])
 
   async function handleStop() {
     setStopping(true)
     try {
       await stopJob(jobId)
     } catch (err) {
-      onError(err.message)
+      if (!finishedRef.current) {
+        finishedRef.current = true
+        onError(err.message)
+      }
     } finally {
       setStopping(false)
     }
