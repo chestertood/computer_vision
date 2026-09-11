@@ -30,7 +30,7 @@ export default function ResultsView({ result, onReset }) {
       {vehicles.length > 0 && (
         <ul className="vehicle-gallery">
           {[...vehicles].reverse().map((v, i) => (
-            <li key={i} className="vehicle-card">
+            <li key={vehicles.length - 1 - i} className="vehicle-card">
               <img src={`data:image/jpeg;base64,${v.image_b64}`} alt={v.type} />
               <span>{v.type}</span>
             </li>
