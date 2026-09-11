@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import UploadStep from './components/UploadStep'
 import LineCanvas from './components/LineCanvas'
+import RoiCanvas from './components/RoiCanvas'
 import ParamsPanel from './components/ParamsPanel'
 import RunStatus from './components/RunStatus'
 import ResultsView from './components/ResultsView'
@@ -13,6 +14,8 @@ export default function App() {
   const [step, setStep] = useState('setup') // 'setup' | 'running' | 'results'
   const [videoData, setVideoData] = useState(null)
   const [params, setParams] = useState({ conf: 0.5, imgsz: 960, classes: DEFAULT_CLASSES, line_y: 0 })
+  const [roi, setRoi] = useState(null)
+  const [drawMode, setDrawMode] = useState('line') // 'line' | 'roi'
   const [jobId, setJobId] = useState(null)
   const [result, setResult] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
@@ -27,14 +30,19 @@ export default function App() {
     setStarting(true)
     setErrorMessage(null)
     try {
-      const job = await createJob({ video_id: videoData.video_id, ...params })
+      const job = await createJob({ video_id: videoData.video_id, ...params, roi })
       setJobId(job.job_id)
+      setResult(null)
       setStep('running')
     } catch (err) {
       setErrorMessage(err.message)
     } finally {
       setStarting(false)
     }
+  }
+
+  function handleProgress(res) {
+    setResult(res)
   }
 
   function handleDone(res) {
@@ -79,16 +87,47 @@ export default function App() {
           {!videoData && <UploadStep onUploaded={handleUploaded} />}
 
           {videoData && step !== 'results' && (
-            <LineCanvas
-              imageUrl={videoData.preview_frame_url}
-              width={videoData.width}
-              height={videoData.height}
-              lineY={params.line_y}
-              onChange={(line_y) => setParams((p) => ({ ...p, line_y }))}
-            />
+            <div className="setup-area">
+              <div className={`preview-stack ${running ? 'preview-stack--locked' : ''}`}>
+                <LineCanvas
+                  imageUrl={videoData.preview_frame_url}
+                  width={videoData.width}
+                  height={videoData.height}
+                  lineY={params.line_y}
+                  onChange={(line_y) => setParams((p) => ({ ...p, line_y }))}
+                />
+                <RoiCanvas
+                  width={videoData.width}
+                  height={videoData.height}
+                  roi={roi}
+                  onChange={setRoi}
+                  style={{ pointerEvents: drawMode === 'roi' ? 'auto' : 'none' }}
+                />
+              </div>
+              {!running && (
+                <div className="draw-mode-toggle" role="radiogroup" aria-label="Draw mode">
+                  <button
+                    type="button"
+                    aria-pressed={drawMode === 'line'}
+                    className={drawMode === 'line' ? 'active' : ''}
+                    onClick={() => setDrawMode('line')}
+                  >
+                    Line
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={drawMode === 'roi'}
+                    className={drawMode === 'roi' ? 'active' : ''}
+                    onClick={() => setDrawMode('roi')}
+                  >
+                    ROI
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
-          {step === 'results' && result && (
+          {step === 'results' && result?.output_video_url && (
             <video
               className="result-video"
               src={result.output_video_url}
@@ -113,7 +152,9 @@ export default function App() {
       <footer className="panel panel--footer">
         <div className="panel__body panel__body--footer">
           {errorMessage && <p role="alert">{errorMessage}</p>}
-          {running && <RunStatus jobId={jobId} onDone={handleDone} onError={handleError} />}
+          {running && (
+            <RunStatus jobId={jobId} onProgress={handleProgress} onDone={handleDone} onError={handleError} />
+          )}
           {!errorMessage && !running && (
             <p className="empty">
               {videoData
