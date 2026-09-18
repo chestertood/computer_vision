@@ -30,6 +30,12 @@ export default function RoiCanvas({ width, height, roi, onChange, style }) {
     if (!roi) return
     const w = roi.x2 - roi.x1
     const h = roi.y2 - roi.y1
+    // Everything outside the box is dimmed, so the picked area reads at a glance.
+    ctx.fillStyle = 'rgba(8, 11, 22, 0.55)'
+    ctx.beginPath()
+    ctx.rect(0, 0, width, height)
+    ctx.rect(roi.x1, roi.y1, w, h)
+    ctx.fill('evenodd')
     // Dark solid underlay so the dashed stroke stays readable on bright sky
     // and dark asphalt alike; the gaps show the underlay through.
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)'

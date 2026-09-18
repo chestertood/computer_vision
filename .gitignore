@@ -5,6 +5,9 @@ backend/.venv/
 __pycache__/
 *.pyc
 backend/outputs/
+backend/media/
+backend/results/
+backend/models/
 *.mp4
 *.pt
 backend/car_*.jpg
